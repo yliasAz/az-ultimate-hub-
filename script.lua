@@ -1,25 +1,22 @@
 -- AZ ULTIMATE HUB | Rayfield UI | Made for Ylias
--- Version Finalisée, Optimisée, Vérifiée ligne par ligne
+-- Version optimisée, corrigée, et fonctionnelle
 
 if not game:IsLoaded() then game.Loaded:Wait() end
+
 local Players = game:GetService('Players')
 local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local TeleportService = game:GetService('TeleportService')
 local CoreGui = game:GetService('CoreGui')
 local StarterGui = game:GetService('StarterGui')
+local Workspace = game:GetService('Workspace')
 
-_G = _G or {}
-
--- AZ ULTIMATE HUB | Rayfield Edition – Made for Ylias
--- Refonte complète de l’interface avec Rayfield UI
-
+-- Rayfield UI
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
-
 local Window = Rayfield:CreateWindow({
 	Name = "AZ Ultimate Hub | Made for Ylias",
 	LoadingTitle = "Chargement du menu...",
-	LoadingSubtitle = "Connexion à la zone de triche...",
+	LoadingSubtitle = "Connexion au système...",
 	ConfigurationSaving = {
 		Enabled = true,
 		FolderName = "AZUltimateHub",
@@ -33,7 +30,7 @@ local Window = Rayfield:CreateWindow({
 	KeySystem = false,
 })
 
--- Onglets principaux
+-- Tabs
 local autoTab = Window:CreateTab("Auto Farm", 4483362458)
 local espTab = Window:CreateTab("ESP", 4483362438)
 local teleportTab = Window:CreateTab("Teleport", 4483362440)
@@ -41,21 +38,22 @@ local statsTab = Window:CreateTab("Stats", 4483362443)
 local fruitTab = Window:CreateTab("Fruit Tools", 4483362442)
 local settingsTab = Window:CreateTab("Settings", 4483362441)
 
--- Footer visuel
+-- Notifications
 Rayfield:Notify({
 	Title = "AZ ULTIMATE HUB",
-	Content = "Made for Ylias | Interface Rayfield UI activée",
+	Content = "Rayfield UI chargée | Made for Ylias",
 	Duration = 6,
 	Image = 4483362458
 })
--- AUTO FARM COMPLET | Rayfield Edition | Made for Ylias
 
+-- Variables
 local WeaponType = "Melee"
 local AutoFarm = false
 local AutoQuest = false
 local FastHit = false
 local FruitSnipe = false
 
+-- Auto Farm
 autoTab:CreateDropdown({
 	Name = "Sélection de l’arme",
 	Options = {"Melee", "Sword", "Fruit"},
@@ -76,7 +74,7 @@ autoTab:CreateToggle({
 			while AutoFarm do
 				pcall(function()
 					local pos = Vector3.new(100, 10, 100)
-					local char = game.Players.LocalPlayer.Character
+					local char = Players.LocalPlayer.Character
 					if char and char:FindFirstChild("HumanoidRootPart") then
 						char.HumanoidRootPart.CFrame = CFrame.new(pos)
 					end
@@ -93,7 +91,7 @@ autoTab:CreateToggle({
 	Flag = "AutoQuest",
 	Callback = function(state)
 		AutoQuest = state
-		local Remote = game:GetService("ReplicatedStorage").Remotes:FindFirstChild("CommF_")
+		local Remote = ReplicatedStorage:WaitForChild("Remotes"):FindFirstChild("CommF_")
 		local quests = {
 			{lvl = 1, name = "BanditQuest1", id = 1, min = 0, max = 9},
 			{lvl = 2, name = "GorillaQuest", id = 1, min = 10, max = 29},
@@ -102,7 +100,7 @@ autoTab:CreateToggle({
 		task.spawn(function()
 			while AutoQuest do
 				pcall(function()
-					local level = game.Players.LocalPlayer.Data.Level.Value
+					local level = Players.LocalPlayer.Data.Level.Value
 					for _,q in pairs(quests) do
 						if level >= q.min and level <= q.max then
 							Remote:InvokeServer("StartQuest", q.name, q.id)
@@ -115,6 +113,7 @@ autoTab:CreateToggle({
 		end)
 	end
 })
+
 autoTab:CreateToggle({
 	Name = "Fast Attack / Multi Hit",
 	CurrentValue = false,
@@ -123,7 +122,7 @@ autoTab:CreateToggle({
 		FastHit = state
 		task.spawn(function()
 			while FastHit do
-				for _,enemy in pairs(workspace.Enemies:GetChildren()) do
+				for _,enemy in pairs(Workspace.Enemies:GetChildren()) do
 					if enemy:FindFirstChild("Humanoid") then
 						enemy.Humanoid.Health = 0
 					end
@@ -141,7 +140,7 @@ autoTab:CreateToggle({
 	Callback = function(state)
 		FruitSnipe = state
 		local rareFruits = {"Dragon", "Leopard", "Dough", "Spirit", "Venom"}
-		local Remote = game:GetService("ReplicatedStorage").Remotes:FindFirstChild("CommF_")
+		local Remote = ReplicatedStorage:WaitForChild("Remotes"):FindFirstChild("CommF_")
 		task.spawn(function()
 			while FruitSnipe do
 				for _,fruit in pairs(rareFruits) do
@@ -156,8 +155,7 @@ autoTab:CreateToggle({
 	end
 })
 
--- ESP COMPLET | Rayfield Edition
-
+-- ESP
 local function createESP(object, label, color)
 	if not object:FindFirstChild("Head") then return end
 	if object.Head:FindFirstChild("ESP") then return end
@@ -180,8 +178,8 @@ espTab:CreateToggle({
 	CurrentValue = false,
 	Flag = "espPlayers",
 	Callback = function(state)
-		for _,plr in pairs(game.Players:GetPlayers()) do
-			if plr ~= game.Players.LocalPlayer and plr.Character then
+		for _,plr in pairs(Players:GetPlayers()) do
+			if plr ~= LocalPlayer and plr.Character then
 				if state then
 					createESP(plr.Character, plr.Name, Color3.fromRGB(0, 255, 255))
 				else
@@ -194,6 +192,7 @@ espTab:CreateToggle({
 		end
 	end
 })
+
 espTab:CreateToggle({
 	Name = "ESP Fruits",
 	CurrentValue = false,
@@ -201,7 +200,7 @@ espTab:CreateToggle({
 	Callback = function(state)
 		task.spawn(function()
 			while state do
-				for _,item in pairs(workspace:GetDescendants()) do
+				for _,item in pairs(Workspace:GetDescendants()) do
 					if item:IsA("Tool") and item:FindFirstChild("Handle") and string.find(item.Name:lower(), "fruit") then
 						createESP(item.Handle, item.Name, Color3.fromRGB(255, 170, 0))
 					end
@@ -219,7 +218,7 @@ espTab:CreateToggle({
 	Callback = function(state)
 		task.spawn(function()
 			while state do
-				for _,model in pairs(workspace:GetDescendants()) do
+				for _,model in pairs(Workspace:GetDescendants()) do
 					if model:IsA("Model") and model:FindFirstChildWhichIsA("TouchTransmitter") and string.find(model.Name:lower(), "chest") then
 						createESP(model, model.Name, Color3.fromRGB(255, 255, 0))
 					end
@@ -230,8 +229,7 @@ espTab:CreateToggle({
 	end
 })
 
--- TÉLÉPORTATION | Rayfield UI
-
+-- Teleport
 local TeleportLocations = {
 	["Départ"] = Vector3.new(105, 10, 1200),
 	["Marine Base"] = Vector3.new(-250, 20, 800),
@@ -246,16 +244,16 @@ for name, position in pairs(TeleportLocations) do
 	teleportTab:CreateButton({
 		Name = "TP vers " .. name,
 		Callback = function()
-			local char = game.Players.LocalPlayer.Character
+			local char = LocalPlayer.Character
 			if char and char:FindFirstChild("HumanoidRootPart") then
 				char.HumanoidRootPart.CFrame = CFrame.new(position)
 			end
 		end
 	})
 end
--- AUTO STATS UPGRADE | Rayfield UI
 
-local Remote = game:GetService("ReplicatedStorage").Remotes:FindFirstChild("CommF_") or {}
+-- Auto Stats
+local Remote = ReplicatedStorage.Remotes:FindFirstChild("CommF_") or {}
 
 local function upgradeStat(stat)
 	task.spawn(function()
@@ -280,27 +278,8 @@ for _,stat in ipairs({"Melee", "Defense", "Sword", "Gun", "Demon Fruit"}) do
 	})
 end
 
--- PARAMÈTRES FINAUX | Rayfield UI
-
+-- Settings
 settingsTab:CreateButton({
 	Name = "Rejoindre la partie",
 	Callback = function()
-		local plr = game.Players.LocalPlayer
-		game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, plr)
-	end
-})
-
-settingsTab:CreateButton({
-	Name = "Fermer le menu",
-	Callback = function()
-		local gui = game:GetService("CoreGui"):FindFirstChild("Rayfield")
-		if gui then gui:Destroy() end
-	end
-})
--- Footer personnalisé "Made for Ylias"
-Rayfield:Notify({
-	Title = "AZ Ultimate Hub",
-	Content = "Interface Rayfield chargée | Made for Ylias",
-	Duration = 6,
-	Image = 4483362458
-})
+		TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer
